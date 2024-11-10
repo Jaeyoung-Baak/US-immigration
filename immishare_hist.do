@@ -14,7 +14,7 @@
 ***
 clear all
 set more off
-cd "Appropriate repository"
+cd "Your directory"
 
 *****************************************
 ***      Crosswalk (EGLP - Eckert)    ***
@@ -44,7 +44,7 @@ drop if age<15
 drop if age>64
 drop sample serial hhwt gq metro metarea metaread pernum perwt bpld mbpl mbpld fbpl fbpld nativity citizen versionhist histid region sex age birthyr occ1950 ind1950
 drop if yrimmig == 0
-save "Appropriate file name", replace
+save "Your file name", replace
 
 ***********
 ** 1910s **
