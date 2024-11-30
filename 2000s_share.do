@@ -188,11 +188,8 @@ sort year cty_fips bpl_final
 gen bpl_oneout = Mot-Moct // oneout version
 save immshare_current.dta, replace
 
-/* keep if year == 2005 & cty_fips == 1001
-collapse (sum) Mot */ // 193,000,000
 
-************ > new immigrants
-****
+*** Merging hist + current
 use "/Users/jaeyoungbaak/Dropbox/Research/Project_I/DataWork/Research_imm/immshare_hist_agedrop/immshare_hist_new.dta", clear
 expand 17
 sort cty_fips bpl_final
@@ -208,10 +205,9 @@ drop _merge
 drop dup
 order year cty_fips bpl_final Moct Mot bpl_oneout Moct_Mot immshare_ct cty_pop
 save immshare_new.dta, replace
-**********************************
 
+*** Constructing IV
 use immshare_new.dta, clear
-
 ** Current National Imm * Historical share
 foreach value in 1890s 1900s 1910s 1920s 1960s 1970s {
 	gen Mot_share`value' = Mot*share`value' // Mot: the number of nation immigrants from origin country O to US, at time t, where t = 2005~2021
@@ -238,3 +234,4 @@ keep year cty_fips immshare_ct cty_pop immIV_1890s immIVoneout_1890s immIV_1900s
 order year cty_fips immshare_ct cty_pop immIV_1890s immIVoneout_1890s immIV_1900s immIVoneout_1900s immIV_1910s immIVoneout_1910s immIV_1920s immIVoneout_1920s immIV_1960s immIVoneout_1960s immIV_1970s immIVoneout_1970s
 save immIV_new_final.dta, replace
 ***
+*** End of this file ***
