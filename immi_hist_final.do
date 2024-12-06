@@ -350,7 +350,7 @@ use 1960sbpl.dta, clear
 
 merge m:1 cty_fips bpl_final using "Moc1960s.dta"
 sort cty_fips bpl_final
-replace Moc1970 = 0 if Moc1970 ==.
+replace Moc1960s = 0 if Moc1960s ==.
 drop _merge
 merge m:1 bpl_final using "Mo1960s.dta"
 sort cty_fips bpl_final
