@@ -6,15 +6,15 @@
 * 2) 2010PUMAs;2012-2021 ACS years: 2010puma > fips
 * Written by Jae Young Baak 
 * First created date: 2023-11-05
-* Last update: 2024-03-16 // Add inc variables
-* Outcome files: immIV_sc_covariates.dta
+* Last update: 2024-03-16
+* Outcome files: immIV_new_final.dta
 ********************************************************************************
 
 ***
 clear all
 set more off
 set matsize 1000
-cd "/Users/jaeyoungbaak/Dropbox/Research/Project_I/DataWork/Research_imm/immshare_current"
+cd "/Users/jaeyoungbaak/Dropbox/Research/Project_I/DataWork/Research_imm/immshare_current_final"
 
 /* use "/Users/jaeyoungbaak/Dropbox/Research/Project_I/DataWork/Research_imm/immshare_hist/usa_00026.dta", clear
 drop if year < 2005
@@ -23,6 +23,8 @@ drop if age>64
 drop sample serial cbserial cluster region metro metarea metaread strata gq momrule poprule mom2rule pop2rule sex age birthyr citizen occ occ2010 ind indnaics
 save currentACS.dta, replace */
 
+*2000PUMAs: 2005-2011* ACS year
+*2010PUMAs: 2012-2021 ACS year
 ***************
 ** upto 2011 **
 ***************
@@ -37,7 +39,7 @@ drop if _merge == 2 // statefip: puerto rico only, 99 obs
 
 order year statefip puma State10 PUMA10 bpl
 sort year State10 PUMA10 statefip puma bpl
-gen fweight=pPUMA00_Pop10/100 // fweight ∈ [0,1] // temptemp.dta
+gen fweight=pPUMA00_Pop10/100 // fweight ∈ [0,1] 
 
 collapse (sum) fweight [fw=perwt], by(year State10 PUMA10 bpl)
 ren State10 statefip
@@ -188,26 +190,30 @@ sort year cty_fips bpl_final
 gen bpl_oneout = Mot-Moct // oneout version
 save immshare_current.dta, replace
 
-
-*** Merging hist + current
-use "/Users/jaeyoungbaak/Dropbox/Research/Project_I/DataWork/Research_imm/immshare_hist_agedrop/immshare_hist_new.dta", clear
-expand 17
+***********************************************
+** Merging current data with historical data **
+***********************************************
+use "/Users/jaeyoungbaak/Dropbox/Research/Project_I/DataWork/Research_imm/immshare_hist_final/immshare_hist_final.dta", clear
+expand 17 // The number of sample years
 sort cty_fips bpl_final
 quietly by cty_fips bpl_final: gen dup=cond(_N==1,0,_n)
 gen year = 2004 + dup
 order year cty_fips bpl_final
 merge 1:1 year cty_fips bpl_final using immshare_current.dta // _merge == 1: 1,666 / 2: 81,753 / 3: 2,589,797
 drop if bpl_final == 50 // Not identified in immshare_hist_agedrop.dta - 53,431 obs (All from using)
-tab cty_fips if _merge == 1 // # 833 - fips 55901 (17*49) 17년 49개bpl
-tab cty_fips if _merge == 2 // # 28,322: Alaska(17*49*29), Hawaii (17*49*5) 17년 * 49개bpl * # of unmatched fips
+tab cty_fips if _merge == 1 // # 833 - fips 55901 (17*49) (number of years * number of bpl)
+tab cty_fips if _merge == 2 // # 28,322: Alaska(17*49*29), Hawaii (17*49*5) (number of years * number of bpl * number of unmatched fips)
 keep if _merge == 3
 drop _merge
 drop dup
 order year cty_fips bpl_final Moct Mot bpl_oneout Moct_Mot immshare_ct cty_pop
 save immshare_new.dta, replace
 
-*** Constructing IV
+**********************************
+**   Construct shift-share IV   **
+**********************************
 use immshare_new.dta, clear
+
 ** Current National Imm * Historical share
 foreach value in 1890s 1900s 1910s 1920s 1960s 1970s {
 	gen Mot_share`value' = Mot*share`value' // Mot: the number of nation immigrants from origin country O to US, at time t, where t = 2005~2021
@@ -228,10 +234,10 @@ foreach value in 1890s 1900s 1910s 1920s 1960s 1970s {
 	by cty_fips: gen immIVoneout_`value' = oneout_predicted_imm_`value'/cty_pop[_n-1] // predicted immigrant share (oneout version)
 }
 sort year cty_fips
-
-save immIV_new_temp.dta, replace
 keep year cty_fips immshare_ct cty_pop immIV_1890s immIVoneout_1890s immIV_1900s immIVoneout_1900s immIV_1910s immIVoneout_1910s immIV_1920s immIVoneout_1920s immIV_1960s immIVoneout_1960s immIV_1970s immIVoneout_1970s
 order year cty_fips immshare_ct cty_pop immIV_1890s immIVoneout_1890s immIV_1900s immIVoneout_1900s immIV_1910s immIVoneout_1910s immIV_1920s immIVoneout_1920s immIV_1960s immIVoneout_1960s immIV_1970s immIVoneout_1970s
+
 save immIV_new_final.dta, replace
-***
+
+
 *** End of this file ***
