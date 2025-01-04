@@ -10,6 +10,37 @@ You can find crosswalk file from: 1) https://fpeckert.me/eglp/  2) https://justi
 2) Crosswalks from ‘County Groups’ to Counties for the 1970 and 1980 U.S. Decennial Census Metro Samples (Wiltshire, 2021, Unpublished manuscript)
 3) Geographic Crosswalks (IPUMS NHGIS)
 
+# Explanation of Main Steps (immi_hist_final.do)
+## Eckert Crosswalk (1900–1930)
+
+You load a CSV (eglp_county_crosswalk_endyr_2010.csv) containing mappings from historical ICPSR county identifiers to modern county FIPS codes.
+Years 1900, 1910, 1920, and 1930 are split into separate files for convenience.
+
+## IPUMS Data (Full-Count)
+
+You filter each census year’s dataset to keep only certain age ranges and immigrant years, then create “Immonly” files.
+
+## Constructing Shares for 1890s–1920s
+
+For each decade (e.g., 1890s), you keep immigrants who arrived in that specific decade.
+You join each immigrant record to a county crosswalk to identify their county FIPS code.
+MocXXXXs: number of immigrants from birthplace O to county C during decade XXXX.
+MoXXXXs: total immigrants from birthplace O to the US in that decade (summing over all counties).
+shareXXXXs = MocXXXXs / MoXXXXs: fraction of that origin O’s immigrants who went to county C, for each decade.
+
+## Wiltshire Crosswalk (1970, 1980)
+
+Similar logic as Eckert crosswalk but for 1970 and 1980 samples, using county groups (cntygp97, cntygp98) mapped to modern county FIPS.
+Again, you compute Moc1960s, Moc1970s, etc., indicating how many 1960s or 1970s arrivals ended up in each county.
+
+## Merging Decade-Specific Shares
+
+The final step merges all decade-specific share files (1890s, 1900s, 1910s, 1920s, 1960s, 1970s) into one dataset (immshare_hist_final.dta), keyed by county (cty_fips) and birthplace code (bpl_final).
+
+## Adjusting County FIPS (David Dorn Corrections)
+
+Some counties had FIPS code changes over time (e.g., 12025 -> 12086).
+You apply these adjustments to keep consistency.
 
 # Explanation of Main Steps (immi_2000s_final.do)
 ## Loading and Preprocessing Data
