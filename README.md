@@ -68,13 +68,8 @@ Mot: total immigrants from origin country O to the US at time t (aggregated acro
 
 ## Share_t
 share_t = Moct / Mot, the share of immigrants from origin O in a specific county C relative to the entire country in year t.
-Combining 2005–2011 and 2012–2021
 
-You append the two separate time spans into one dataset and compute additional county-level aggregates (cty_pop, immshare_ct).
-Historical Merging
-
-You integrate historical shares (e.g., 1890s, 1900s, etc.) by merging in another dataset (immshare_hist_final.dta) expanded by year.
-Predicted Immigrant Share
+### Predicted Immigrant Share
 
 For each historical period (e.g., 1890s, 1900s, etc.), you multiply current national immigrant counts (Mot) by historical county shares (share1890s, etc.) to get a predicted total count for each county.
 You sum these predictions across birthplaces, then scale by the county’s population in the previous year to get a predicted immigrant share (immIV_1890s, etc.).
